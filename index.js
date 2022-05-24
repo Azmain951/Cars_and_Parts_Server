@@ -46,7 +46,7 @@ async function run() {
             res.send(product);
         });
 
-        app.post('/products', async (req, res) => {
+        app.post('/products', verifyJWT, async (req, res) => {
             const product = req.body;
             const result = await productCollection.insertOne(product);
             res.send(result);
@@ -65,7 +65,7 @@ async function run() {
             res.send(orders);
         });
 
-        app.patch('/orders', async (req, res) => {
+        app.patch('/orders', verifyJWT, async (req, res) => {
             const order = req.body;
             const quantity = order.quantity;
             const stock = order.stock;
@@ -84,13 +84,13 @@ async function run() {
         });
 
 
-        app.get('/user', async (req, res) => {
+        app.get('/user', verifyJWT, async (req, res) => {
             const users = await userCollection.find().toArray();
             res.send(users);
         });
 
 
-        app.put('/user/:email', async (req, res) => {
+        app.put('/user/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const user = req.body;
             console.log(user)
@@ -111,7 +111,7 @@ async function run() {
             res.send(users);
         });
 
-        app.post('/review', async (req, res) => {
+        app.post('/review', verifyJWT, async (req, res) => {
             const review = req.body;
             const result = await reviewCollection.insertOne(review);
             res.send(result);
