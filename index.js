@@ -1,6 +1,7 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -17,6 +18,8 @@ async function run() {
     await client.connect();
     const productCollection = client.db('manufacturer_website').collection('products');
     const orderCollection = client.db('manufacturer_website').collection('orders');
+    const userCollection = client.db('manufacturer_website').collection('users');
+    const reviewCollection = client.db('manufacturer_website').collection('reviews');
     try {
         app.get('/products', async (req, res) => {
             const products = await productCollection.find().toArray();
@@ -28,6 +31,25 @@ async function run() {
             const query = { _id: ObjectId(id) }
             const product = await productCollection.findOne(query);
             res.send(product);
+        });
+
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await productCollection.insertOne(product);
+            res.send(result);
+        });
+
+        app.get('/orders', async (req, res) => {
+            const orders = await orderCollection.find().toArray();
+            res.send(orders);
+        });
+
+        app.get('/orders/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email };
+            const orders = await orderCollection.find(query).toArray();
+            console.log(orders);
+            res.send(orders);
         });
 
         app.patch('/orders', async (req, res) => {
@@ -48,13 +70,39 @@ async function run() {
             res.send(result);
         });
 
-        app.get('/orders/:email', async (req, res) => {
+
+        app.get('/user', async (req, res) => {
+            const users = await userCollection.find().toArray();
+            res.send(users);
+        });
+
+
+        app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
-            const query = { email };
-            const orders = await orderCollection.find(query).toArray();
-            console.log(orders);
-            res.send(orders);
-        })
+            const user = req.body;
+            console.log(user)
+            const filter = { email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user
+            }
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '30d'
+            })
+            res.send({ result, token });
+        });
+
+        app.get('/review', async (req, res) => {
+            const users = await reviewCollection.find().toArray();
+            res.send(users);
+        });
+
+        app.post('/review', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        });
     }
     finally {
 
