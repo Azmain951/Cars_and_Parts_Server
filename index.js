@@ -106,20 +106,8 @@ async function run() {
             res.send(order);
         })
 
-        app.patch('/orders', async (req, res) => {
+        app.post('/orders', verifyJWT, async (req, res) => {
             const order = req.body;
-            const quantity = order.quantity;
-            const stock = order.stock;
-            const newStock = stock - quantity;
-            const id = order.productId;
-            const query = { _id: ObjectId(id) };
-            const updatedDoc = {
-                $set: {
-                    stock: newStock,
-                }
-            }
-            const updatedProduct = await productCollection.updateOne(query, updatedDoc);
-            console.log(updatedProduct);
             const result = await orderCollection.insertOne(order);
             res.send(result);
         });
