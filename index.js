@@ -119,7 +119,8 @@ async function run() {
             const updatedDoc = {
                 $set: {
                     paid: true,
-                    transactionId: payment.transactionId
+                    transactionId: payment.transactionId,
+                    status: 'paid'
                 }
             }
             const updatedOrder = await orderCollection.updateOne(query, updatedDoc);
