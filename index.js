@@ -104,7 +104,7 @@ async function run() {
             const order = await orderCollection.findOne(query);
             console.log(order)
             res.send(order);
-        })
+        });
 
         app.post('/orders', async (req, res) => {
             const order = req.body;
@@ -127,6 +127,13 @@ async function run() {
             const result = await paymentCollection.insertOne(payment);
             res.send(updatedOrder);
 
+        });
+
+        app.delete('/orders/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await orderCollection.deleteOne(query);
+            res.send(result);
         })
 
 
@@ -135,11 +142,31 @@ async function run() {
             res.send(users);
         });
 
+        app.get('/user/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await userCollection.findOne(query);
+            console.log(user)
+            res.send(user);
+        });
+
+        app.patch('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email };
+            const updateDoc = {
+                $set: {
+                    address: user.address,
+                    phone: user.phone
+                }
+            }
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result,);
+        });
 
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
-            console.log(user)
             const filter = { email };
             const options = { upsert: true };
             const updateDoc = {
